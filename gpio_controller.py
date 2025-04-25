@@ -1,84 +1,17 @@
-import serial
-import time
-import re
+from typing import Unpack, overload
 
+import numpy as np
+import qcodes
+import time
+
+from qcodes import Parameter, InstrumentChannel, ChannelList, VisaInstrument
+from qcodes.instrument import InstrumentModule, InstrumentBaseKWArgs, InstrumentBase
 
 ARDUINO_PIN_COUNT = 14
 MCP23017_PIN_COUNT = 16
 
 
-class SerialCommunicator:
-    def __init__(self, serial_interface):
-        self.serial_interface = serial_interface
-
-    def send(self, command: str) -> str:
-        full_command = command.strip() + "\n"
-        self.serial_interface.write(full_command.encode('utf-8'))
-        time.sleep(0.1)
-        # Read one line from the serial interface
-        response = self.serial_interface.readline().decode('utf-8').strip()
-        return response
-
-
-class Pin:
-    """
-    A class representing a GPIO pin used by both Arduino and MCP modules.
-    """
-
-    def __init__(self, module, pin_number: int):
-        self.module = module
-        self.pin_number = pin_number
-
-    def set(self, value: bool) -> None:
-        state = "HIGH" if value else "LOW"
-        cmd = f"{self.pin_number} {state}"
-        self.module.send_command(cmd)
-
-    def read(self) -> bool:
-        cmd = f"{self.pin_number} read"
-        response = self.module.send_command(cmd)
-        # Assume the response contains "state: 1" for HIGH.
-        return '1' in response
-
-
-class GPIOModule():
-    def __init__(self, communicator: SerialCommunicator, pin_count: int, module_index: int):
-        self.communicator = communicator
-        self.module_index = module_index  # This value prefixes each command.
-        self.pins = [Pin(self, i) for i in range(pin_count)]
-
-    def send_command(self, command: str) -> str:
-        # Prefix command with the module index assigned by the controller.
-        full_command = f"{self.module_index} {command.strip()}"
-        return self.communicator.send(full_command)
-
-
-# class ArduinoModule(GPIOModule):
-#     def __init__(self, communicator: SerialCommunicator, pin_count: int, module_index: int = 0):
-#         super().__init__(communicator, module_index)
-#         self.pin_count = pin_count
-#         self.pins = [Pin(self, i) for i in range(pin_count)]
-#
-#     def send_command(self, command: str) -> str:
-#         # Prefix command with module index (0 for Arduino native pins).
-#         full_command = f"{self.module_index} {command.strip()}"
-#         return self.communicator.send(full_command)
-#
-#
-# class MCPModule(GPIOModule):
-#     def __init__(self, communicator: SerialCommunicator, address: int, pin_count: int = 16, module_index: int = 1):
-#         super().__init__(communicator, module_index)
-#         self.address = address  # Informational only; Arduino uses module index.
-#         self.pin_count = pin_count
-#         self.pins = [Pin(self, i) for i in range(pin_count)]
-#
-#     def send_command(self, command: str) -> str:
-#         # Prefix command with the module index assigned by the controller.
-#         full_command = f"{self.module_index} {command.strip()}"
-#         return self.communicator.send(full_command)
-
-
-class ArduinoGPIOController:
+class Pin(InstrumentChannel):
     """
     Controller class to manage GPIO on Arduino and connected MCP23017 modules.
     During initialization, it establishes the serial connection and reads the startup
@@ -87,64 +20,89 @@ class ArduinoGPIOController:
       - Index 0: Arduino native pins.
       - Indices 1..n: MCP23017 modules discovered during setup.
     """
+    default_terminator = "\n"
 
-    def __init__(self, port: str, baudrate: int = 115200, timeout: float = 1):
-        self.port = port
-        self.baudrate = baudrate
-        self.timeout = timeout
+    def __init__(self, parent: 'GPIOModule', name: str, pin_number: int, **kwargs: Unpack[InstrumentBaseKWArgs]):
 
-        self._serial_interface = None
-        try:
-            self._serial_interface = serial.Serial(port, baudrate, timeout=timeout)
-        except serial.SerialException as e:
-            raise Exception(f"Could not open serial port {port}: {e}")
+        super().__init__(parent, name, **kwargs)
+        self.add_parameter('state', qcodes.Parameter,
+                           get_cmd=f'PIN{pin_number}:STATe?',
+                           set_cmd=f'PIN{pin_number}:STATe {{:d}}',
+                           get_parser=int)
 
-        self.communicator = SerialCommunicator(self._serial_interface)
+        self.add_parameter('mode', qcodes.Parameter,
+                           get_cmd=f'PIN{pin_number}:MODE?',
+                           set_cmd=f'PIN{pin_number}:MODE {{:d}}',
+                           get_parser=int)
 
-        # Read all output from the Arduino's setup (including discovery and device info)
-        startup_lines = self._read_all_lines(timeout=2.0)
-        print("Startup messages from Arduino:")
-        for line in startup_lines:
-            print(line)
 
-        # Parse discovered MCP23017 module addresses from the startup messages
-        addresses = []
-        for line in startup_lines:
-            # Look for lines like: "MCP23017 initialized at 0x20"
-            m = re.search(r"MCP23017 initialized at 0x([0-9A-Fa-f]+)", line)
-            if m:
-                addr = int(m.group(1), 16)
-                addresses.append(addr)
+class GPIOModule(InstrumentModule):
+    def __init__(self, pin_count: int, module_index: int, parent: InstrumentBase,
+                 name: str, **kwargs: Unpack[InstrumentBaseKWArgs]):
+        super().__init__(parent, name, **kwargs)
+        self.module_index = module_index  # This value prefixes each command.
+        self.pins = [Pin(self, f'pin_{i}', i) for i in range(pin_count)]
 
-        # Initialize modules list: index 0 for Arduino native pins
-        self.modules = [GPIOModule(self.communicator, ARDUINO_PIN_COUNT, module_index=0)]
-        for _ in addresses:
-            module_index = len(self.modules)
-            self.modules.append(GPIOModule(self.communicator, MCP23017_PIN_COUNT, module_index=module_index))
+    def ask(self, cmd: str) -> str:
+        return super().ask(f'MODule{self.module_index}:{cmd}')
 
-    def _read_all_lines(self, timeout=1.0):
-        """
-        Helper method to read all available lines from the serial interface within a timeout.
-        """
-        lines = []
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            while self._serial_interface.in_waiting:
-                line = self._serial_interface.readline().decode('utf-8').strip()
-                if line:
-                    lines.append(line)
-            time.sleep(0.1)
-        return lines
+    def write(self, cmd: str) -> None:
+        super().write(f'MODule{self.module_index}:{cmd}')
 
-    def module_count(self) -> int:
-        return len(self.modules)
 
-    def _close(self):
-        if self._serial_interface is not None and self._serial_interface.is_open:
-            self._serial_interface.close()
+class GPIOController(VisaInstrument):
+    def __init__(self, name: str, address: str, **kwargs: Unpack[InstrumentBaseKWArgs]):
+        super().__init__(name, address, **kwargs)
+        modules = ChannelList(
+            self, "gpio_modules", GPIOModule
+        )
 
-    def __del__(self):
-        self._close()
+        self._modules_count = self.add_parameter('_modules_count', Parameter,
+                                                 get_cmd='INFO:MODules:COUNt?',
+                                                 get_parser=int)
+
+        modules.append(GPIOModule(ARDUINO_PIN_COUNT, 0, self, 'arduino_module'))
+
+        time.sleep(2)
+
+        for module_id in range(1, self._modules_count()):
+            modules.append(GPIOModule(MCP23017_PIN_COUNT, module_id, self, f'mcp23017_module_{module_id}'))
+
+        self.add_submodule('modules', modules.to_channel_tuple())
+
+        for module in self.modules:
+            for pin in module.pins:
+                pin.mode(1)
+                pin.state(0)
+
+
+def _int_to_bool_tuple(value: int, n_bits: int):
+    binary_array = np.array(list(np.binary_repr(value, width=n_bits)), dtype=int)
+    bool_tuple = tuple(binary_array.astype(bool))
+    return bool_tuple
+
+
+def _bool_tuple_to_int(bool_tuple):
+    binary_string = ''.join(['1' if x else '0' for x in bool_tuple])
+    return int(binary_string, 2)
+
+
+class Bus(tuple[Pin]):
+    @overload
+    def state(self) -> int:
+        pass
+
+    @overload
+    def state(self, val: int) -> None:
+        pass
+
+    def state(self, val=None):
+        if val is None:
+            return _bool_tuple_to_int(pin.state() for pin in self)
+
+        bool_tuple = _int_to_bool_tuple(val, len(self))
+        for pin, state in zip(self, bool_tuple):
+            pin.state(state)
 
 
 # -----------------------------------------------------------------------------
@@ -152,14 +110,20 @@ class ArduinoGPIOController:
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     # Replace 'COM3' with the correct serial port for your setup.
-    controller = ArduinoGPIOController("/dev/cu.wchusbserial1420")
-    print("Total modules detected:", controller.module_count())
+    controller = GPIOController('test', "COM5")
+
+    # print("Total modules detected:", controller.module_count())
 
     # Example: Set Arduino native pin 13 to HIGH and read its state.
-    controller.modules[0].pins[13].set(True)
-    print("Arduino pin 13 state:", controller.modules[0].pins[13].read())
+    controller.modules[0].pins[13].mode(1)
+    controller.modules[0].pins[13].state(1)
+    try:
+        print("Arduino pin 13 state:", controller.modules[0].pins[13].state())
+    except Exception as e:
+        print(e)
 
-    # If an MCP module was discovered (module index 1), control one of its pins.
-    if controller.module_count() > 1:
-        controller.modules[1].pins[7].set(False)
-        print("MCP pin 7 state:", controller.modules[1].pins[7].read())
+    # # If an MCP module was discovered (module index 1), control one of its pins.
+    # if controller.module_count() > 1:
+    controller.modules[1].pins[0].mode(1)
+    controller.modules[1].pins[0].state(1)
+    print("MCP pin 7 state:", controller.modules[1].pins[0].state())

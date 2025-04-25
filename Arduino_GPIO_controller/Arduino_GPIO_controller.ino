@@ -1,65 +1,144 @@
-#include <Wire.h>
+#define ARDUINO_PINS_COUNT 14
+#define MAX_MCP_COUNT 8
+#define MCP_PINS_COUNT 16
+
+#include "Arduino.h"
+#include "Vrekrer_scpi_parser.h"
 #include <Adafruit_MCP23X17.h>
 
-#define MAX_MCP 8  // Maximum number of supported MCP23017 modules
-#define ARDUINO_PORTS 14 // The amount of Arduino ports
-#define MCP_PORTS 16 // The amount of MCP23017 ports
+int arduino_pin_modes[ARDUINO_PINS_COUNT];
+int mcp_pin_modes[MAX_MCP_COUNT][MCP_PINS_COUNT];
+int num_mcp_discovered = 0;
+uint8_t discovered_mcp_addresses[MAX_MCP_COUNT];
 
-// Array of MCP23017 objects
-Adafruit_MCP23X17 mcp[MAX_MCP];
-// Array to store discovered MCP23017 addresses
-uint8_t discovered_mcp_addresses[MAX_MCP];
-// Actual number of discovered modules
-uint8_t num_mcp_discovered = 0;
+Adafruit_MCP23X17 mcp[MAX_MCP_COUNT];
+
+SCPI_Parser scpi_parser;
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) { delay(10); }
-  Serial.println("GPIO Controller Starting...");
-  Wire.begin();
+  scpi_parser.RegisterCommand("*IDN?", &Identify);
 
-  // Automatically run discovery and device information functions in setup
+  scpi_parser.SetCommandTreeBase(F("INFO"));
+    scpi_parser.RegisterCommand(F("MODules:COUNt?"), &QueryModulesCount);
+
+  //Use "#" at the end of a token to accept numeric suffixes.
+  scpi_parser.SetCommandTreeBase(F("MODule#:PIN#"));
+    scpi_parser.RegisterCommand(F("MODE?"), &QueryPinMode);
+    scpi_parser.RegisterCommand(F("MODE"), &WritePinMode);
+    scpi_parser.RegisterCommand(F("STATe?"), &QueryPinState);
+    scpi_parser.RegisterCommand(F("STATe"), &WritePinState);
+
   discovery();
-  deviceInfo();
+
+  Serial.begin(9600);
 }
 
 void loop() {
-  // Optionally, process additional commands received via serial after setup.
-  if (Serial.available()) {
-    String input = Serial.readStringUntil('\n');
-    input.trim();
-    if (input.length() > 0) {
-      processCommand(input);
-    }
-  }
+  scpi_parser.ProcessInput(Serial, "\r");
 }
 
-void reset_arduino_ports() {
-  for (int pin = 0; pin < ARDUINO_PORTS; ++pin) {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
-  }
+int get_pin_number(SCPI_C commands) {
+  String pin_cmd = String(commands[1]);
+  pin_cmd.toUpperCase();
+
+  int suffix = -1;
+  sscanf(pin_cmd.c_str(),"%*[PIN]%u", &suffix);
+
+  return suffix;
 }
 
-void reset_mcp_ports(const Adafruit_MCP23X17& module) {
-  for (int pin = 0; pin < ARDUINO_PORTS; ++pin) {
-    module.pinMode(pin, OUTPUT);
-    module.digitalWrite(pin, LOW);
-  }
+int get_module_number(SCPI_C commands) {
+  String module_cmd = String(commands[0]);
+  module_cmd.toUpperCase();
+
+  int suffix = -1;
+  sscanf(module_cmd.c_str(),"%*[MODULE]%u", &suffix);
+
+  return suffix;
 }
 
-void reset() {
-  reset_arduino_ports();
-  for (const Adafruit_MCP23X17& module: mcp) {
-    reset_mcp_ports(module);
+bool check_constraints(const int& module_number, const int& pin_number) {
+  if (module_number < 0 || module_number > num_mcp_discovered) return false;
+  if (module_number == 0) return pin_number < ARDUINO_PINS_COUNT;
+  return pin_number < MCP_PINS_COUNT;
+}
+
+int get_pin_mode(const int& module_number, const int& pin_number) {
+  if (!check_constraints(module_number, pin_number)) return -1;
+  if (module_number == 0) {
+    return arduino_pin_modes[pin_number];
+  }
+  int mcp_number = module_number - 1;
+  return mcp_pin_modes[mcp_number][pin_number];
+}
+
+void set_pin_mode(const int& module_number, const int& pin_number, const int& pin_mode) {
+  if (!check_constraints(module_number, pin_number)) return;
+  if (pin_mode < 0 || pin_mode > 2) return;
+  if (module_number == 0) {
+    arduino_pin_modes[pin_number] = pin_mode;
+    pinMode(pin_number, pin_mode);
+    return;
+  }
+  int mcp_number = module_number - 1;
+  mcp_pin_modes[mcp_number][pin_number] = pin_mode;
+  mcp[mcp_number].pinMode(pin_number, pin_mode);
+}
+
+void Identify(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+    interface.println(F("Vrekrer,SCPI Numeric suffixes example,#00," 
+                        VREKRER_SCPI_VERSION));
+}
+
+void QueryModulesCount(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  interface.println(num_mcp_discovered + 1);
+}
+
+void QueryPinMode(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  int module_number = get_module_number(commands);
+  int pin_number = get_pin_number(commands);
+  interface.println(get_pin_mode(module_number, pin_number));
+}
+
+void WritePinMode(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  int module_number = get_module_number(commands);
+  int pin_number = get_pin_number(commands);
+  String parameter_str = String(parameters.First());
+  int pin_mode = parameter_str.toInt();
+  set_pin_mode(module_number, pin_number, pin_mode);
+}
+
+void QueryPinState(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  int module_number = get_module_number(commands);
+  int pin_number = get_pin_number(commands);
+  if (!check_constraints(module_number, pin_number)) return;
+  int pin_state;
+  if (module_number == 0) {
+    pin_state = digitalRead(pin_number);
+  } else {
+    int mcp_number = module_number - 1;
+    pin_state = mcp[mcp_number].digitalRead(pin_number);
+  }
+  interface.println(pin_state);
+}
+
+void WritePinState(SCPI_C commands, SCPI_P parameters, Stream& interface) {
+  int module_number = get_module_number(commands);
+  int pin_number = get_pin_number(commands);
+  if (!check_constraints(module_number, pin_number)) return;
+  String parameter_str = String(parameters.First());
+  int pin_state = parameter_str.toInt();
+  if (module_number == 0) {
+    digitalWrite(pin_number, pin_state);
+  } else {
+    int mcp_number = module_number - 1;
+    mcp[mcp_number].digitalWrite(pin_number, pin_state);
   }
 }
 
 // Function to scan the I2C bus and initialize MCP23017 modules dynamically
 void discovery() {
-  Serial.println("Scanning I2C bus for MCP23017 devices...");
   byte error, address;
-  int nDevices = 0;
   num_mcp_discovered = 0;  // Reset discovered modules count
 
   // Scan addresses from 8 to 126
@@ -67,121 +146,18 @@ void discovery() {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
     if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address < 16) Serial.print("0");
-      Serial.print(address, HEX);
-      Serial.println("!");
-
       // Attempt to initialize the device as MCP23017 if space is available
-      if (num_mcp_discovered < MAX_MCP) {
+      if (num_mcp_discovered < MAX_MCP_COUNT) {
         if (mcp[num_mcp_discovered].begin_I2C(address)) {
-          discovered_mcp_addresses[num_mcp_discovered] = address;
-          Serial.print("MCP23017 initialized at 0x");
-          if (address < 16) Serial.print("0");
-          Serial.print(address, HEX);
-          Serial.println();
-          // Set all 16 pins to OUTPUT mode and initialize them to LOW
-          for (uint8_t pin = 0; pin < 16; pin++) {
-            mcp[num_mcp_discovered].pinMode(pin, OUTPUT);
-            mcp[num_mcp_discovered].digitalWrite(pin, LOW);
-          }
+          discovered_mcp_addresses[num_mcp_discovered] = address;         
           num_mcp_discovered++;
-        } else {
-          Serial.print("Device at 0x");
-          Serial.print(address, HEX);
-          Serial.println(" is not MCP23017");
         }
       }
-      nDevices++;
     } else if (error == 4) {
       Serial.print("Unknown error at address 0x");
       if (address < 16) Serial.print("0");
       Serial.println(address, HEX);
     }
   }
-  if (nDevices == 0)
-    Serial.println("No I2C devices found");
-  else
-    Serial.println("I2C scan completed");
 }
-
-// Function to output device information
-void deviceInfo() {
-  Serial.println("Device Info:");
-  Serial.println("Firmware: GPIO Controller v1.0");
-  Serial.print("Number of MCP23017 modules discovered: ");
-  Serial.println(num_mcp_discovered);
-}
-
-// Function to process additional commands (if needed)
-// Expected command format: <moduleIndex> <pin> <action>
-// moduleIndex 0: Arduino native pins
-// moduleIndex >= 1: MCP23017 modules (index = moduleIndex - 1)
-void processCommand(String command) {
-  const int maxTokens = 3;
-  String tokens[maxTokens];
-  int tokenCount = 0;
-  int start = 0;
-  command += " "; // Append space to capture the last token.
-  for (int i = 0; i < command.length(); i++) {
-    if (command.charAt(i) == ' ') {
-      if (i > start) {
-        tokens[tokenCount++] = command.substring(start, i);
-        if (tokenCount >= maxTokens) break;
-      }
-      start = i + 1;
-    }
-  }
-  if (tokenCount != 3) {
-    Serial.println("Invalid command. Format: <moduleIndex> <pin> <action>");
-    return;
-  }
-
-  int moduleIndex = tokens[0].toInt();
-  int pin = tokens[1].toInt();
-  String action = tokens[2];
-
-  if (moduleIndex == 0) {
-    // Process Arduino native pin
-    if (action.equalsIgnoreCase("read")) {
-      int state = digitalRead(pin);
-      Serial.print("Arduino pin ");
-      Serial.print(pin);
-      Serial.print(" state: ");
-      Serial.println(state);
-    } else {
-      int value = (action.equalsIgnoreCase("HIGH") || tokens[2].toInt() == 1) ? HIGH : LOW;
-      digitalWrite(pin, value);
-      Serial.print("Arduino pin ");
-      Serial.print(pin);
-      Serial.print(" set to ");
-      Serial.println(value == HIGH ? "HIGH" : "LOW");
-    }
-  } else {
-    // Process MCP23017 module
-    int mcpIndex = moduleIndex - 1;
-    if (mcpIndex < 0 || mcpIndex >= num_mcp_discovered) {
-      Serial.println("Invalid MCP module index");
-      return;
-    }
-    uint8_t address = discovered_mcp_addresses[mcpIndex];
-    if (action.equalsIgnoreCase("read")) {
-      uint8_t state = mcp[mcpIndex].digitalRead(pin);
-      Serial.print("MCP 0x");
-      Serial.print(address, HEX);
-      Serial.print(" pin ");
-      Serial.print(pin);
-      Serial.print(" state: ");
-      Serial.println(state);
-    } else {
-      int value = (action.equalsIgnoreCase("HIGH") || tokens[2].toInt() == 1) ? HIGH : LOW;
-      mcp[mcpIndex].digitalWrite(pin, value);
-      Serial.print("MCP 0x");
-      Serial.print(address, HEX);
-      Serial.print(" pin ");
-      Serial.print(pin);
-      Serial.print(" set to ");
-      Serial.println(value == HIGH ? "HIGH" : "LOW");
-    }
-  }
-}
+  
