@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import yaml
+from qcodes.instrument import InstrumentBaseKWArgs
 from qcodes.parameters import Parameter
 import qcodes.validators as vals
 

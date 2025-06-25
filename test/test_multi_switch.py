@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from switch.multi_switch import MultiSwitch
 from switch.sp8t_switch import SP8T_Switch
@@ -27,13 +28,14 @@ class TestMultiSwitch(unittest.TestCase):
         self.s1 = DummySwitch("s1")
         self.s2 = DummySwitch("s2")
         self.leds = tuple(DummyPin() for _ in range(22))
+        config_path = Path(__file__).resolve().parent.parent / "switch" / "switch_config.yaml"
         self.ms = MultiSwitch(
             "multi",
             self.main,
             self.s1,
             self.s2,
             self.leds,
-            "switch/switch_config.yaml",
+            config_path,
         )
 
     def test_state_mapping(self):
