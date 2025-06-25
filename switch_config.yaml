@@ -1,0 +1,23 @@
+states:
+  - {main: 1, sw1: 0}
+  - {main: 1, sw1: 1}
+  - {main: 1, sw1: 2}
+  - {main: 1, sw1: 3}
+  - {main: 1, sw1: 4}
+  - {main: 1, sw1: 5}
+  - {main: 1, sw1: 6}
+  - {main: 1, sw1: 7}
+  - {main: 0, sw2: 0}
+  - {main: 0, sw2: 1}
+  - {main: 0, sw2: 2}
+  - {main: 0, sw2: 3}
+  - {main: 0, sw2: 4}
+  - {main: 0, sw2: 5}
+  - {main: 0, sw2: 6}
+  - {main: 0, sw2: 7}
+  - {main: 2}
+  - {main: 3}
+  - {main: 4}
+  - {main: 5}
+  - {main: 6}
+  - {main: 7}
