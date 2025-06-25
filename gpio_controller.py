@@ -20,8 +20,6 @@ class Pin(InstrumentChannel):
       - Index 0: Arduino native pins.
       - Indices 1..n: MCP23017 modules discovered during setup.
     """
-    default_terminator = "\n"
-
     def __init__(self, parent: 'GPIOModule', name: str, pin_number: int, **kwargs: Unpack[InstrumentBaseKWArgs]):
 
         super().__init__(parent, name, **kwargs)
@@ -36,7 +34,7 @@ class Pin(InstrumentChannel):
                            get_parser=int)
 
 
-class GPIOModule(InstrumentModule):
+class GPIOModule(InstrumentChannel):
     def __init__(self, pin_count: int, module_index: int, parent: InstrumentBase,
                  name: str, **kwargs: Unpack[InstrumentBaseKWArgs]):
         super().__init__(parent, name, **kwargs)
