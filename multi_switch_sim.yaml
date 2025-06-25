@@ -1,0 +1,1094 @@
+spec: "1.1"  # pyvisa-sim specification version
+
+devices:
+  ArduinoMCP:
+    # End of message: incoming command terminator and response terminator
+    eom:
+      ASRL INSTR:
+        q: "\r\n"
+        r: "\r\n"
+
+    # Error returned for unrecognized commands or out-of-spec queries
+    error: ERROR
+
+    # Static SCPI dialogues
+    dialogues:
+      - q: "*IDN?"
+        r: "NUST MISiS,GPIO controler,#0001,1.0.0"
+
+    # Memory-backed properties
+    properties:
+      # Number of modules (Arduino + 2 MCP chips)
+      modules_count:
+        default: 3
+        getter:
+          q: "INFO:MODules:COUNt?"
+          r: "{:d}"
+        specs:
+          min: 1
+          type: int
+
+      # Arduino Module 0, Pin 0 mode
+      M0_P0_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN0:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN0:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 0 state
+      M0_P0_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN0:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN0:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 1 mode
+      M0_P1_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN1:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN1:MODE {:d}"
+          
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 1 state
+      M0_P1_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN1:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN1:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 2 mode
+      M0_P2_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN2:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN2:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 2 state
+      M0_P2_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN2:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN2:STATe {:d}"
+          
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 3 mode
+      M0_P3_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN3:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN3:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 3 state
+      M0_P3_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN3:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN3:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 4 mode
+      M0_P4_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN4:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN4:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 4 state
+      M0_P4_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN4:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN4:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 5 mode
+      M0_P5_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN5:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN5:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 5 state
+      M0_P5_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN5:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN5:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 6 mode
+      M0_P6_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN6:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN6:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 6 state
+      M0_P6_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN6:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN6:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 7 mode
+      M0_P7_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN7:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN7:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 7 state
+      M0_P7_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN7:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN7:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 8 mode
+      M0_P8_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN8:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN8:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 8 state
+      M0_P8_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN8:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN8:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 9 mode
+      M0_P9_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN9:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN9:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 9 state
+      M0_P9_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN9:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN9:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 10 mode
+      M0_P10_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN10:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN10:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 10 state
+      M0_P10_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN10:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN10:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 11 mode
+      M0_P11_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN11:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN11:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 11 state
+      M0_P11_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN11:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN11:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 12 mode
+      M0_P12_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN12:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN12:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 12 state
+      M0_P12_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN12:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN12:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # Arduino Module 0, Pin 13 mode
+      M0_P13_mode:
+        default: 0
+        getter:
+          q: "MODule0:PIN13:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN13:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # Arduino Module 0, Pin 13 state
+      M0_P13_state:
+        default: 0
+        getter:
+          q: "MODule0:PIN13:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule0:PIN13:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 0 mode
+      M1_P0_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN0:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN0:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 0 state
+      M1_P0_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN0:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN0:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 1 mode
+      M1_P1_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN1:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN1:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 1 state
+      M1_P1_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN1:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN1:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 2 mode
+      M1_P2_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN2:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN2:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 2 state
+      M1_P2_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN2:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN2:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 3 mode
+      M1_P3_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN3:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN3:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 3 state
+      M1_P3_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN3:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN3:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 4 mode
+      M1_P4_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN4:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN4:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 4 state
+      M1_P4_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN4:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN4:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 5 mode
+      M1_P5_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN5:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN5:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 5 state
+      M1_P5_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN5:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN5:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 6 mode
+      M1_P6_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN6:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN6:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 6 state
+      M1_P6_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN6:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN6:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 7 mode
+      M1_P7_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN7:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN7:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 7 state
+      M1_P7_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN7:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN7:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 8 mode
+      M1_P8_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN8:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN8:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 8 state
+      M1_P8_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN8:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN8:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 9 mode
+      M1_P9_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN9:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN9:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 9 state
+      M1_P9_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN9:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN9:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 10 mode
+      M1_P10_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN10:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN10:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 10 state
+      M1_P10_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN10:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN10:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 11 mode
+      M1_P11_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN11:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN11:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 11 state
+      M1_P11_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN11:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN11:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 12 mode
+      M1_P12_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN12:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN12:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 12 state
+      M1_P12_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN12:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN12:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 13 mode
+      M1_P13_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN13:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN13:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 13 state
+      M1_P13_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN13:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN13:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 14 mode
+      M1_P14_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN14:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN14:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 14 state
+      M1_P14_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN14:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN14:STATe {:d}"
+          
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 1, Pin 15 mode
+      M1_P15_mode:
+        default: 0
+        getter:
+          q: "MODule1:PIN15:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN15:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 1, Pin 15 state
+      M1_P15_state:
+        default: 0
+        getter:
+          q: "MODule1:PIN15:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule1:PIN15:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 0 mode
+      M2_P0_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN0:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN0:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 0 state
+      M2_P0_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN0:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN0:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 1 mode
+      M2_P1_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN1:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN1:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 1 state
+      M2_P1_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN1:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN1:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 2 mode
+      M2_P2_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN2:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN2:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 2 state
+      M2_P2_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN2:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN2:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 3 mode
+      M2_P3_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN3:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN3:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 3 state
+      M2_P3_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN3:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN3:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 4 mode
+      M2_P4_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN4:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN4:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 4 state
+      M2_P4_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN4:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN4:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 5 mode
+      M2_P5_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN5:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN5:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 5 state
+      M2_P5_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN5:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN5:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 6 mode
+      M2_P6_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN6:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN6:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 6 state
+      M2_P6_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN6:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN6:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 7 mode
+      M2_P7_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN7:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN7:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 7 state
+      M2_P7_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN7:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN7:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 8 mode
+      M2_P8_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN8:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN8:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 8 state
+      M2_P8_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN8:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN8:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 9 mode
+      M2_P9_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN9:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN9:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 9 state
+      M2_P9_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN9:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN9:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 10 mode
+      M2_P10_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN10:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN10:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 10 state
+      M2_P10_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN10:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN10:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 11 mode
+      M2_P11_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN11:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN11:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 11 state
+      M2_P11_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN11:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN11:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 12 mode
+      M2_P12_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN12:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN12:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 12 state
+      M2_P12_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN12:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN12:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 13 mode
+      M2_P13_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN13:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN13:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 13 state
+      M2_P13_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN13:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN13:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 14 mode
+      M2_P14_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN14:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN14:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 14 state
+      M2_P14_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN14:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN14:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+      # MCP Module 2, Pin 15 mode
+      M2_P15_mode:
+        default: 0
+        getter:
+          q: "MODule2:PIN15:MODE?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN15:MODE {:d}"
+        specs:
+          valid: [0, 1, 2]  # INPUT, OUTPUT, INPUT_PULLUP
+          type: int
+      # MCP Module 2, Pin 15 state
+      M2_P15_state:
+        default: 0
+        getter:
+          q: "MODule2:PIN15:STATe?"
+          r: "{:d}"
+        setter:
+          q: "MODule2:PIN15:STATe {:d}"
+        specs:
+          valid: [0, 1]  # LOW, HIGH
+          type: int
+
+resources:
+  ASRL1::INSTR:
+    device: ArduinoMCP
