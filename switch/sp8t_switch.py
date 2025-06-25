@@ -4,7 +4,7 @@ import qcodes.validators as vals
 from qcodes.instrument import InstrumentBaseKWArgs
 
 from gpio_controller import Bus
-from abstract_switch import AbstractSwitch
+from .abstract_switch import AbstractSwitch
 
 
 class SP8T_Switch(AbstractSwitch):

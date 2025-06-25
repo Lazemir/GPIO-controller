@@ -5,8 +5,8 @@ from qcodes.parameters import Parameter
 import qcodes.validators as vals
 
 from gpio_controller import Pin
-from abstract_switch import AbstractSwitch
-from sp8t_switch import SP8T_Switch
+from .abstract_switch import AbstractSwitch
+from .sp8t_switch import SP8T_Switch
 
 
 class MultiSwitch(AbstractSwitch):

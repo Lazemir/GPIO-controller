@@ -1,6 +1,6 @@
-from abstract_switch import AbstractSwitch
-from sp8t_switch import SP8T_Switch
-from multi_switch import MultiSwitch
+from switch.abstract_switch import AbstractSwitch
+from switch.sp8t_switch import SP8T_Switch
+from switch.multi_switch import MultiSwitch
 from gpio_controller import GPIOController, Bus, Pin
 
 __all__ = [
