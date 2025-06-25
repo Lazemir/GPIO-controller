@@ -1,8 +1,8 @@
 import unittest
 
-from multi_switch import MultiSwitch
-from sp8t_switch import SP8T_Switch
-from abstract_switch import AbstractSwitch
+from switch.multi_switch import MultiSwitch
+from switch.sp8t_switch import SP8T_Switch
+from switch.abstract_switch import AbstractSwitch
 from gpio_controller import Bus
 
 
@@ -33,7 +33,7 @@ class TestMultiSwitch(unittest.TestCase):
             self.s1,
             self.s2,
             self.leds,
-            "switch_config.yaml",
+            "switch/switch_config.yaml",
         )
 
     def test_state_mapping(self):
